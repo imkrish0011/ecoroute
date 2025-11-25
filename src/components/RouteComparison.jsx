@@ -1,46 +1,81 @@
 import React from 'react';
-import RouteCard from './RouteCard';
-import { getRouteRecommendations } from '../utils/routeLogic';
+import { MapPin, Mountain, Wind, ArrowRight } from 'lucide-react';
+import CircleProgress from './CircleProgress';
 
-const RouteComparison = ({ routes }) => {
+const RouteComparison = ({ routes, onSelect, selectedRouteId }) => {
     if (!routes || routes.length === 0) return null;
 
-    // Find driving route for comparison
-    const drivingRoute = routes.find(r => r.type === 'driving-car');
-
-    // Get distance from driving route (or first available) to apply logic
-    const referenceRoute = drivingRoute || routes[0];
-    const distanceKm = referenceRoute && referenceRoute.data ? referenceRoute.data.summary.distance / 1000 : 0;
-
-    const recommendations = getRouteRecommendations(distanceKm);
+    // Find best metrics
+    const minDistance = Math.min(...routes.map(r => r.distanceKm));
+    const minCo2 = Math.min(...routes.map(r => r.co2));
+    const maxScore = Math.max(...routes.map(r => r.ecoScore));
 
     return (
         <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Route Options</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-                {routes.map((route, index) => {
-                    if (route.error) return null; // Skip failed routes or handle them differently
-
-                    const rec = recommendations[route.type];
-                    if (!rec || !rec.show) return null;
+            <h3 className="text-white font-semibold flex items-center gap-2">
+                <ArrowRight className="text-green-500" />
+                Route Options
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+                {routes.map((route, idx) => {
+                    const isGreenest = route.co2 === minCo2;
+                    const isShortest = route.distanceKm === minDistance;
+                    const isBestScore = route.ecoScore === maxScore;
+                    const isSelected = selectedRouteId === route.id;
 
                     return (
-                        <RouteCard
-                            key={index}
-                            route={route}
-                            drivingRoute={drivingRoute}
-                        />
-                    );
-                })}
-            </div>
+                        <div
+                            key={idx}
+                            onClick={() => onSelect(route)}
+                            className={`relative p-4 rounded-xl border transition-all cursor-pointer ${isSelected
+                                ? 'bg-[#2a2a2a] border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.2)]'
+                                : 'bg-[#1a1a1a] border-[#333] hover:border-gray-500'
+                                }`}
+                        >
+                            {/* Badges */}
+                            <div className="absolute -top-3 left-4 flex gap-2">
+                                {isGreenest && (
+                                    <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-bold shadow-sm">
+                                        Greenest
+                                    </span>
+                                )}
+                                {isShortest && !isGreenest && (
+                                    <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-bold shadow-sm">
+                                        Shortest
+                                    </span>
+                                )}
+                            </div>
 
-            {/* Show messages for hidden routes */}
-            <div className="text-sm text-gray-500 mt-4 italic">
-                {Object.entries(recommendations).map(([type, rec]) => {
-                    if (!rec.show && rec.reason) {
-                        return <p key={type}>* {type.replace('-', ' ')} not shown: {rec.reason}</p>;
-                    }
-                    return null;
+                            <div className="flex justify-between items-center mt-2">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-white font-bold capitalize">{route.type.replace('-', ' ')}</span>
+                                        <span className="text-gray-500 text-sm">• {route.duration}</span>
+                                    </div>
+
+                                    <div className="flex gap-4 text-sm text-gray-400 mt-2">
+                                        <div className="flex items-center gap-1" title="Distance">
+                                            <MapPin size={14} />
+                                            {route.distanceKm} km
+                                        </div>
+                                        <div className="flex items-center gap-1" title="Elevation Gain">
+                                            <Mountain size={14} />
+                                            {route.elevationGain}m
+                                        </div>
+                                        <div className="flex items-center gap-1" title="CO2 Emissions">
+                                            <Wind size={14} />
+                                            {route.co2}g
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col items-center gap-1">
+                                    <CircleProgress score={route.ecoScore} size={48} strokeWidth={3} />
+                                    <span className="text-[10px] text-gray-500 uppercase font-bold">EcoScore</span>
+                                </div>
+                            </div>
+                        </div>
+                    );
                 })}
             </div>
         </div>

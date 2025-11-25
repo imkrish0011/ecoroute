@@ -9,6 +9,7 @@
   --bg-card: #2a2a2a;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
+
   --text-muted: #666666;
   --accent-green: #10b981;
   --accent-green-light: #34d399;
@@ -193,4 +194,67 @@ button:active {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Custom animations for LoginPage */
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-delayed {
+
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+
+  50% {
+    transform: translateY(-15px) translateX(10px);
+  }
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite 2s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.group-hover\:animate-shimmer {
+  animation: shimmer 1.5s ease-in-out;
 }

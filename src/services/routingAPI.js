@@ -75,7 +75,8 @@ export const fetchRoutes = async (start, end) => {
         // Fetch real routes from API
         const requests = profiles.map(profile =>
             axios.post(`${BASE_URL}/${profile}/geojson`, {
-                coordinates: [start, end] // [lng, lat]
+                coordinates: [start, end], // [lng, lat]
+                elevation: true
             }, {
                 headers: {
                     'Authorization': API_KEY,
